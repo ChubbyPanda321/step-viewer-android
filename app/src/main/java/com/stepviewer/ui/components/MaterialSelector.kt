@@ -1,6 +1,7 @@
 package com.stepviewer.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -37,21 +38,25 @@ fun MaterialSelector(
     val presets = materials.filter { !it.isCustom }
     val customs = materials.filter { it.isCustom }
 
-    OutlinedTextField(
-        value = selectedMaterial?.name ?: stringResource(R.string.select_material),
-        onValueChange = {},
-        readOnly = true,
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clickable { expanded = true },
-        label = { Text(stringResource(R.string.material)) },
-        trailingIcon = {
-            androidx.compose.material3.IconButton(onClick = { expanded = true }) {
-                Text("▼", style = MaterialTheme.typography.bodySmall)
-            }
-        },
-        singleLine = true,
-    )
+    ) {
+        OutlinedTextField(
+            value = selectedMaterial?.name ?: stringResource(R.string.select_material),
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.material)) },
+            trailingIcon = {
+                androidx.compose.material3.IconButton(onClick = { expanded = true }) {
+                    Text("▲", style = MaterialTheme.typography.bodySmall)
+                }
+            },
+            singleLine = true,
+        )
+    }
 
     DropdownMenu(
         expanded = expanded,
