@@ -160,8 +160,8 @@
 
             const matSolid = new THREE.MeshPhongMaterial({
                 color: color,
-                specular: 0x111111,
-                shininess: 30,
+                specular: 0x666666,
+                shininess: 50,
                 side: THREE.DoubleSide,
             });
 
@@ -174,25 +174,25 @@
 
             const matTransparent = new THREE.MeshPhongMaterial({
                 color: color,
-                specular: 0x111111,
-                shininess: 30,
+                specular: 0x666666,
+                shininess: 50,
                 side: THREE.DoubleSide,
                 transparent: true,
                 opacity: 0.4,
             });
 
-            // Edge line for solid+edges mode
-            const edgeGeo = new THREE.EdgesGeometry(geometry, 15);
+            // Edge line for solid+edges mode — low threshold catches subtle edges
+            const edgeGeo = new THREE.EdgesGeometry(geometry, 2);
             const edgeLine = new THREE.LineSegments(
                 edgeGeo,
-                new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 })
+                new THREE.LineBasicMaterial({ color: 0x000000 })
             );
             edgeLine.visible = false;
 
             // Hidden-line: white solid with black edges on white background
             const matHiddenLine = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
             const hiddenLineEdges = new THREE.LineSegments(
-                new THREE.EdgesGeometry(geometry, 15),
+                new THREE.EdgesGeometry(geometry, 2),
                 new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 })
             );
             hiddenLineEdges.visible = false;
@@ -488,15 +488,15 @@
             TWO: THREE.TOUCH.DOLLY_PAN,
         };
 
-        // Lights
-        state.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-        var dl1 = new THREE.DirectionalLight(0xffffff, 0.8);
+        // Lights — lower ambient for contrast, strong key + fill for depth
+        state.scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+        var dl1 = new THREE.DirectionalLight(0xffffff, 1.0);
         dl1.position.set(1, 1, 1);
         state.scene.add(dl1);
-        var dl2 = new THREE.DirectionalLight(0xffffff, 0.4);
-        dl2.position.set(-1, -0.5, -0.5);
+        var dl2 = new THREE.DirectionalLight(0xffffff, 0.6);
+        dl2.position.set(-1, -0.3, -0.5);
         state.scene.add(dl2);
-        var dl3 = new THREE.DirectionalLight(0xffffff, 0.3);
+        var dl3 = new THREE.DirectionalLight(0xffffff, 0.35);
         dl3.position.set(0, -1, 0);
         state.scene.add(dl3);
 
