@@ -63,6 +63,7 @@
     <string name="screenshot_captured">截图已保存</string>
     <string name="export_stl">导出 STL</string>
     <string name="share">分享</string>
+    <string name="snap_to_vertex">节点吸附</string>
     <string name="distance">距离</string>
     <string name="favorite">收藏</string>
     <string name="unfavorite">取消收藏</string>

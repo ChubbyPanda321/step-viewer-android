@@ -54,6 +54,7 @@ fun InfoPanel(
     materials: List<Material>,
     isMeasuring: Boolean,
     showDimensions: Boolean,
+    snapToVertex: Boolean,
     viewMode: ViewMode,
     isFavorite: Boolean,
     isModelLoaded: Boolean,
@@ -64,6 +65,7 @@ fun InfoPanel(
     onAddCustomMaterial: () -> Unit,
     onToggleMeasurement: () -> Unit,
     onToggleShowDimensions: () -> Unit,
+    onToggleSnapToVertex: () -> Unit,
     onViewModeChange: (ViewMode) -> Unit,
     onFavoriteToggle: () -> Unit,
     onFitView: () -> Unit,
@@ -257,6 +259,11 @@ fun InfoPanel(
                                     modifier = Modifier.size(16.dp),
                                 )
                             },
+                        )
+                        FilterChip(
+                            selected = snapToVertex,
+                            onClick = onToggleSnapToVertex,
+                            label = { Text(stringResource(R.string.snap_to_vertex)) },
                         )
                     }
 

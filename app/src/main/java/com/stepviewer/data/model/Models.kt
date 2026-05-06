@@ -97,7 +97,7 @@ data class ViewerUiState(
     val editingMaterial: Material? = null,
     val showFileHistory: Boolean = false,
     val snackbarMessage: String? = null,
-    val snapToVertex: Boolean = true,
+    val snapToVertex: Boolean = false,
     val showInfoPanel: Boolean = false,
     val showDimensions: Boolean = false,
 )

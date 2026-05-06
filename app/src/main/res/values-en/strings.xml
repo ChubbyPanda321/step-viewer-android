@@ -63,6 +63,7 @@
     <string name="screenshot_captured">Screenshot captured</string>
     <string name="export_stl">Export STL</string>
     <string name="share">Share</string>
+    <string name="snap_to_vertex">Snap to Vertex</string>
     <string name="distance">Distance</string>
     <string name="favorite">Favorite</string>
     <string name="unfavorite">Unfavorite</string>
