@@ -104,6 +104,12 @@ fun ViewerScreen(
         }
     }
 
+    // Refresh material presets when locale changes (activity recreates)
+    val currentLang = LocaleHelper.getLanguageCode(context)
+    LaunchedEffect(currentLang) {
+        viewModel.refreshMaterials()
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
@@ -153,7 +159,6 @@ fun ViewerScreen(
                     )
 
                     // Language toggle
-                    val currentLang = LocaleHelper.getLanguageCode(context)
                     val nextLang = if (currentLang == "zh") "en" else "zh"
                     val nextLangLabel = if (nextLang == "zh") "中" else "EN"
                     androidx.compose.material3.TextButton(

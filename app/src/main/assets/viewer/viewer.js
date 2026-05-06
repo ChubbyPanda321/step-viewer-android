@@ -507,8 +507,6 @@
 
         // Raycaster for measurement
         state.raycaster = new THREE.Raycaster();
-        state.raycaster.params.Points.threshold = 2;
-        state.raycaster.params.Line = { threshold: 2 };
         state.mouse = new THREE.Vector2();
 
         // Measurement group

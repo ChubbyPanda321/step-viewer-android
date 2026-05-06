@@ -10,9 +10,9 @@ import com.stepviewer.util.LocaleHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
@@ -26,6 +26,12 @@ class MaterialRepository @Inject constructor(
     companion object {
         private const val PRESETS_FILE_DEFAULT = "materials.json"
         private const val PRESETS_FILE_EN = "materials-en.json"
+    }
+
+    private val _refreshTrigger = MutableStateFlow(0L)
+
+    fun refreshPresets() {
+        _refreshTrigger.value++
     }
 
     /**
@@ -59,7 +65,7 @@ class MaterialRepository @Inject constructor(
      * Combined flow: presets + custom materials as a single list.
      */
     fun allMaterials(): Flow<List<Material>> = combine(
-        flowOf(emptyList<Material>()), // placeholder, overwritten
+        _refreshTrigger,
         customMaterials,
     ) { _, customs ->
         val presets = withContext(Dispatchers.IO) { loadPresets() }

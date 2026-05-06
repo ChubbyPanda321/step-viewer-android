@@ -69,10 +69,18 @@ class ViewerViewModel @Inject constructor(
                 _uiState.update { it.copy(themeMode = mode) }
             }
         }
-        // Load materials
+        // Load materials and auto-select first if none chosen
         viewModelScope.launch {
             materialRepo.allMaterials().collect { materials ->
-                _uiState.update { it.copy(materials = materials) }
+                _uiState.update { state ->
+                    val newState = state.copy(materials = materials)
+                    // Auto-select first material if none is selected yet
+                    if (newState.selectedMaterial.name.isEmpty() && materials.isNotEmpty()) {
+                        newState.copy(selectedMaterial = materials.first())
+                    } else {
+                        newState
+                    }
+                }
             }
         }
         // Restore last material
@@ -334,6 +342,13 @@ class ViewerViewModel @Inject constructor(
      */
     fun toggleFileHistory() {
         _uiState.update { it.copy(showFileHistory = !it.showFileHistory) }
+    }
+
+    /**
+     * Refresh preset materials (e.g. after locale change).
+     */
+    fun refreshMaterials() {
+        materialRepo.refreshPresets()
     }
 
     /**
