@@ -675,10 +675,10 @@
                 line.userData = { measurementId: mId };
                 state.measurementGroup.add(line);
 
-                // Tag endpoint spheres with measurementId for cleanup
-                window._previewNodes.forEach(function (n, i) {
+                // Tag endpoint spheres with mId so clearAllMeasurements can remove them
+                window._previewNodes.forEach(function (n) {
+                    n.userData = { measurementId: mId };
                     n.material.color.set(0x1565C0);
-                    n.userData.measurementId = mId;
                 });
 
                 Bridge.onMeasurementResult({
