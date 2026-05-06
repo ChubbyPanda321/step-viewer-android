@@ -1,0 +1,40 @@
+# Gradle
+.gradle/
+build/
+app/build/
+app/release/
+/captures
+.externalNativeBuild
+.cxx
+
+# Android SDK (local, not committed)
+android_sdk/
+local.properties
+
+# IDE
+.idea/
+.idea_modules/
+*.iml
+*.iws
+*.ipr
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+*.log
+
+# Temp / working directories
+.temp/
+.claude/
+
+# Misc
+*.apk
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+.navigation/
