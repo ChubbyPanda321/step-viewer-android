@@ -72,31 +72,28 @@
      * Triggers Three.js scene initialization.
      */
     window.onAndroidReady = function () {
-        console.log('Android bridge ready');
         if (window.Viewer && typeof window.Viewer.init === 'function') {
             window.Viewer.init();
         }
     };
 
     /**
-     * Load a CAD file from base64-encoded data.
-     * Called by Kotlin via evaluateJavascript.
+     * Load a CAD file from a local file path (legacy chunked reading).
      */
-    window.loadFileFromBase64 = function (base64Data, fileName, format) {
-        if (window.Viewer && typeof window.Viewer.loadFile === 'function') {
-            window.Viewer.loadFile(base64Data, fileName, format);
+    window.loadFileFromPath = function (filePath, fileName, format) {
+        if (window.Viewer && typeof window.Viewer.loadFileFromPath === 'function') {
+            window.Viewer.loadFileFromPath(filePath, fileName, format);
         } else {
             Bridge.onError('Viewer not initialized');
         }
     };
 
     /**
-     * Load a CAD file from a local file path.
-     * Called by Kotlin via evaluateJavascript — avoids OOM from base64 encoding.
+     * Load a CAD file from a URL (served by WebViewAssetLoader).
      */
-    window.loadFileFromPath = function (filePath, fileName, format) {
-        if (window.Viewer && typeof window.Viewer.loadFileFromPath === 'function') {
-            window.Viewer.loadFileFromPath(filePath, fileName, format);
+    window.loadFileFromUrl = function (modelUrl, fileName, format) {
+        if (window.Viewer && typeof window.Viewer.loadFileFromUrl === 'function') {
+            window.Viewer.loadFileFromUrl(modelUrl, fileName, format);
         } else {
             Bridge.onError('Viewer not initialized');
         }
@@ -108,6 +105,15 @@
     window.setMeasurementMode = function (enabled) {
         if (window.Viewer && typeof window.Viewer.setMeasurementMode === 'function') {
             window.Viewer.setMeasurementMode(enabled);
+        }
+    };
+
+    /**
+     * Set snap-to-vertex mode on/off.
+     */
+    window.setSnapToVertex = function (enabled) {
+        if (window.Viewer && typeof window.Viewer.setSnapToVertex === 'function') {
+            window.Viewer.setSnapToVertex(enabled);
         }
     };
 
@@ -148,6 +154,15 @@
     };
 
     /**
+     * Show/hide 3D dimension indicators at bounding box extents.
+     */
+    window.setShowDimensions = function (visible) {
+        if (window.Viewer && typeof window.Viewer.setShowDimensions === 'function') {
+            window.Viewer.setShowDimensions(visible);
+        }
+    };
+
+    /**
      * Export current view as a data URL screenshot.
      */
     window.captureScreenshot = function () {
@@ -157,5 +172,4 @@
         return null;
     };
 
-    console.log('bridge.js loaded');
 })();

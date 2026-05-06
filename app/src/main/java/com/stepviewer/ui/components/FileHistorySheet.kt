@@ -2,7 +2,6 @@ package com.stepviewer.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,21 +24,22 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.InsertDriveFile
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stepviewer.R
 import com.stepviewer.data.local.FileHistoryEntity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,16 +77,16 @@ fun FileHistorySheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "Recent Files",
+                    stringResource(R.string.recent_files),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
                 Row {
                     IconButton(onClick = onClearAll) {
-                        Icon(Icons.Filled.DeleteSweep, "Clear history")
+                        Icon(Icons.Filled.DeleteSweep, stringResource(R.string.clear_history))
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, "Close")
+                        Icon(Icons.Filled.Close, stringResource(R.string.close))
                     }
                 }
             }
@@ -99,7 +99,7 @@ fun FileHistorySheet(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        "No files opened yet",
+                        stringResource(R.string.no_files),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -110,7 +110,7 @@ fun FileHistorySheet(
                     if (favorites.isNotEmpty()) {
                         item {
                             Text(
-                                "Favorites",
+                                stringResource(R.string.favorites),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -128,7 +128,7 @@ fun FileHistorySheet(
                             )
                         }
                         item {
-                            Divider(
+                            HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 8.dp),
                             )
                         }
@@ -209,7 +209,7 @@ private fun FileHistoryItem(
         IconButton(onClick = { onToggleFavorite(file) }) {
             Icon(
                 imageVector = if (file.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                contentDescription = "Toggle favorite",
+                contentDescription = if (file.isFavorite) stringResource(R.string.unfavorite) else stringResource(R.string.favorite),
                 tint = if (file.isFavorite) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -218,7 +218,7 @@ private fun FileHistoryItem(
         IconButton(onClick = { onDelete(file) }) {
             Icon(
                 imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete",
+                contentDescription = stringResource(R.string.delete),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

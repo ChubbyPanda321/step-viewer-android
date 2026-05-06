@@ -1,6 +1,7 @@
 package com.stepviewer.data.repository
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.stepviewer.data.model.CadFormat
@@ -53,6 +54,16 @@ class CadFileRepository @Inject constructor(
                 input.copyTo(output, 8192)
             }
         } ?: throw IllegalStateException("Could not read file")
+
+        // Take persistable URI permission so the file can be reopened from history
+        try {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+            )
+        } catch (_: SecurityException) {
+            // Some content providers don't support persistable permissions
+        }
 
         FileLoadResult(
             bytes = ByteArray(0),

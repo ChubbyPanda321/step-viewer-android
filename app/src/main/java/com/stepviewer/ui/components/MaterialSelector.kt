@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -18,7 +18,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stepviewer.R
 import com.stepviewer.data.model.Material
 
 @Composable
@@ -36,13 +38,13 @@ fun MaterialSelector(
     val customs = materials.filter { it.isCustom }
 
     OutlinedTextField(
-        value = selectedMaterial?.name ?: "Select material",
+        value = selectedMaterial?.name ?: stringResource(R.string.select_material),
         onValueChange = {},
         readOnly = true,
         modifier = modifier
             .fillMaxWidth()
             .clickable { expanded = true },
-        label = { Text("Material") },
+        label = { Text(stringResource(R.string.material)) },
         trailingIcon = {
             androidx.compose.material3.IconButton(onClick = { expanded = true }) {
                 Text("▼", style = MaterialTheme.typography.bodySmall)
@@ -56,12 +58,11 @@ fun MaterialSelector(
         onDismissRequest = { expanded = false },
         modifier = Modifier.fillMaxWidth(0.9f),
     ) {
-        // Preset materials
         presets.forEach { material ->
             DropdownMenuItem(
                 text = {
                     Text(
-                        "${material.name} (${material.density} g/mm³)",
+                        "${material.name} (${material.density} ${stringResource(R.string.unit_density)})",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 },
@@ -73,13 +74,12 @@ fun MaterialSelector(
         }
 
         if (customs.isNotEmpty()) {
-            Divider()
-            // Custom materials
+            HorizontalDivider()
             customs.forEach { material ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            "✎ ${material.name} (${material.density} g/mm³)",
+                            "✎ ${material.name} (${material.density} ${stringResource(R.string.unit_density)})",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     },
@@ -91,11 +91,13 @@ fun MaterialSelector(
             }
         }
 
-        Divider()
-        // Add custom material option
+        HorizontalDivider()
         DropdownMenuItem(
             text = {
-                Text("+ Add custom material...", color = MaterialTheme.colorScheme.primary)
+                Text(
+                    stringResource(R.string.add_custom_material),
+                    color = MaterialTheme.colorScheme.primary,
+                )
             },
             onClick = {
                 onAddCustom()
@@ -111,3 +113,5 @@ fun MaterialSelector(
         )
     }
 }
+
+

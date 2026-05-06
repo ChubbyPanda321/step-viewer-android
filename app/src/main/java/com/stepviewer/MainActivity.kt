@@ -2,6 +2,7 @@ package com.stepviewer
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,11 +13,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.stepviewer.data.model.ThemeMode
 import com.stepviewer.ui.components.ViewerScreen
 import com.stepviewer.ui.theme.StepViewerTheme
+import com.stepviewer.util.LocaleHelper
 import com.stepviewer.viewmodel.ViewerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LocaleHelper.wrapWithLocale(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +39,15 @@ class MainActivity : ComponentActivity() {
             }
 
             StepViewerTheme(isDarkTheme = isDarkTheme) {
-                ViewerScreen()
+                ViewerScreen(
+                    onLanguageChanged = { code ->
+                        if (code != LocaleHelper.getLanguageCode(this)) {
+                            LocaleHelper.setLanguageCode(this, code)
+                            Toast.makeText(this, R.string.lang_switched, Toast.LENGTH_SHORT).show()
+                            recreate()
+                        }
+                    },
+                )
             }
 
             // Handle file opened via intent (ACTION_VIEW or ACTION_SEND)
@@ -44,25 +58,19 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // Handle intent in the composable by restarting content
         recreate()
     }
 
-    /**
-     * Extract and load a file from an incoming intent.
-     * Supports ACTION_VIEW (open with) and ACTION_SEND (share to).
-     */
     private fun handleFileIntent(intent: Intent, viewModel: ViewerViewModel) {
         val uri = when (intent.action) {
             Intent.ACTION_VIEW -> intent.data
             Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM)
             else -> null
         }
-        if (uri != null) {
+        if (uri != null && uri.scheme != "file") {
             viewModel.loadFile(uri)
-            // Clear the intent data to avoid reloading on config changes
-            intent.data = null
-            intent.removeExtra(Intent.EXTRA_STREAM)
         }
+        intent.data = null
+        intent.removeExtra(Intent.EXTRA_STREAM)
     }
 }

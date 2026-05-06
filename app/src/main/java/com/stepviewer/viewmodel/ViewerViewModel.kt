@@ -1,9 +1,12 @@
 package com.stepviewer.viewmodel
 
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.stepviewer.R
 import com.stepviewer.bridge.WebViewBridge
 import com.stepviewer.data.model.CadFormat
 import com.stepviewer.data.model.Material
@@ -18,9 +21,13 @@ import com.stepviewer.data.repository.CadFileRepository
 import com.stepviewer.data.repository.FileHistoryRepository
 import com.stepviewer.data.repository.MaterialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,6 +39,7 @@ class ViewerViewModel @Inject constructor(
     private val fileHistoryRepo: FileHistoryRepository,
     private val materialRepo: MaterialRepository,
     private val preferences: AppPreferences,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ViewerUiState())
@@ -40,10 +48,12 @@ class ViewerViewModel @Inject constructor(
     private var currentFileUri: String? = null
     private var currentFileInfo: StepFileInfo = StepFileInfo()
     private var currentVolume: Double = 0.0
+    private var lastLoadedFileName: String? = null
+    private var lastLoadedFormat: String? = null
 
-    // Commands to send to WebView (consumed once by StepWebView)
-    private val _pendingJsCommand = MutableStateFlow<String?>(null)
-    val pendingJsCommand: StateFlow<String?> = _pendingJsCommand.asStateFlow()
+    // Commands to send to WebView (queued via Channel for ordered delivery)
+    private val _pendingJsCommand = Channel<String>(Channel.BUFFERED)
+    val pendingJsCommand: Flow<String> = _pendingJsCommand.receiveAsFlow()
 
     // File history state
     private val _recentFiles = MutableStateFlow<List<FileHistoryEntity>>(emptyList())
@@ -96,8 +106,18 @@ class ViewerViewModel @Inject constructor(
             try {
                 _uiState.update { it.copy(isLoading = true, error = null) }
 
+                // Safety timeout: clear loading state after 60s in case bridge callback is lost
+                viewModelScope.launch {
+                    kotlinx.coroutines.delay(60_000)
+                    if (_uiState.value.isLoading) {
+                        _uiState.update { it.copy(isLoading = false, error = context.getString(R.string.error_timed_out)) }
+                    }
+                }
+
                 val result = cadFileRepo.copyToCache(uri)
                 currentFileUri = uri.toString()
+                lastLoadedFileName = result.fileName
+                lastLoadedFormat = result.format.name.lowercase()
 
                 // Save to file history
                 fileHistoryRepo.addOrUpdate(
@@ -111,22 +131,27 @@ class ViewerViewModel @Inject constructor(
                 val history = fileHistoryRepo.getByUri(uri.toString())
                 _uiState.update { it.copy(isFavorite = history?.isFavorite ?: false) }
 
-                // Send file path to WebView — it will read the file directly
+                // Send URL to WebView — served by WebViewAssetLoader from internal storage
                 val format = result.format.name.lowercase()
-                val escapedPath = result.localPath?.replace("\\", "\\\\") ?: ""
+                val encodedName = java.net.URLEncoder.encode(result.fileName, "UTF-8")
+                    .replace("+", "%20")
+                val modelUrl = "https://appassets.androidplatform.net/models/$encodedName"
                 val escapedName = result.fileName.replace("'", "\\'")
 
                 val command = """
-                    loadFileFromPath('${escapedPath}', '${escapedName}', '${format}');
+                    loadFileFromUrl('${modelUrl}', '${escapedName}', '${format}');
                 """.trimIndent()
 
-                _pendingJsCommand.value = command
+                Log.d("ViewerVM", "Sending JS command for: $modelUrl")
+                sendJsCommand(command)
 
             } catch (e: Exception) {
+                Log.e("ViewerVM", "Error in loadFile: ${e.message}", e)
                 val message = when {
-                    e.message?.contains("too large") == true -> "File is too large (max 200MB)"
-                    e.message?.contains("Unsupported") == true -> "Unsupported file format"
-                    else -> "Error loading file: ${e.message}"
+                    e.message?.contains("too large") == true -> context.getString(R.string.error_file_too_large)
+                    e.message?.contains("Unsupported") == true -> context.getString(R.string.error_format)
+                    e.message?.contains("Permission") == true -> context.getString(R.string.error_permission)
+                    else -> context.getString(R.string.error_generic) + ": ${e.message}"
                 }
                 _uiState.update { it.copy(isLoading = false, error = message) }
             }
@@ -230,14 +255,36 @@ class ViewerViewModel @Inject constructor(
                 measurementVertexCount = 0,
             )
         }
-        viewModelScope.launch {
-            preferences.setMeasurementEnabled(newState)
-        }
         sendJsCommand("setMeasurementMode($newState)")
     }
 
     /**
-     * Set the view mode (solid, wireframe, transparent).
+     * Toggle snap-to-vertex mode.
+     */
+    fun toggleSnapToVertex() {
+        val newState = !_uiState.value.snapToVertex
+        _uiState.update { it.copy(snapToVertex = newState) }
+        sendJsCommand("setSnapToVertex($newState)")
+    }
+
+    /**
+     * Toggle 3D dimension indicators.
+     */
+    fun toggleShowDimensions() {
+        val newState = !_uiState.value.showDimensions
+        _uiState.update { it.copy(showDimensions = newState) }
+        sendJsCommand("setShowDimensions($newState)")
+    }
+
+    /**
+     * Toggle info panel visibility.
+     */
+    fun toggleInfoPanel() {
+        _uiState.update { it.copy(showInfoPanel = !it.showInfoPanel) }
+    }
+
+    /**
+     * Set the view mode.
      */
     fun setViewMode(mode: ViewMode) {
         _uiState.update { it.copy(viewMode = mode) }
@@ -316,6 +363,28 @@ class ViewerViewModel @Inject constructor(
     }
 
     /**
+     * Re-send the last loaded model to WebView. Used after activity recreation
+     * (e.g. language switch) where the WebView is rebuilt but the model is still cached.
+     */
+    fun reloadLastModel() {
+        val fileName = lastLoadedFileName ?: return
+        val format = lastLoadedFormat ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+        }
+
+        val encodedName = java.net.URLEncoder.encode(fileName, "UTF-8")
+            .replace("+", "%20")
+        val modelUrl = "https://appassets.androidplatform.net/models/$encodedName"
+        val escapedName = fileName.replace("'", "\\'")
+        val command = """
+            loadFileFromUrl('${modelUrl}', '${escapedName}', '${format}');
+        """.trimIndent()
+        sendJsCommand(command)
+    }
+
+    /**
      * Re-load from file URI (for "reopen" flow).
      */
     fun reloadFile(uriString: String) {
@@ -364,15 +433,8 @@ class ViewerViewModel @Inject constructor(
     }
 
     private fun sendJsCommand(js: String) {
-        _pendingJsCommand.value = js
-    }
-
-    /**
-     * Consume a pending JS command (called by the WebView composable).
-     */
-    fun consumeJsCommand(): String? {
-        val cmd = _pendingJsCommand.value
-        _pendingJsCommand.value = null
-        return cmd
+        viewModelScope.launch {
+            _pendingJsCommand.send(js)
+        }
     }
 }

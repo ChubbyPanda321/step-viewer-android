@@ -45,13 +45,13 @@ class WebViewBridge {
 
     // Chunked file reading — maps handle → open RandomAccessFile
     private val fileHandles = mutableMapOf<String, RandomAccessFile>()
-    private val CHUNK_SIZE = 256 * 1024 // 256KB per chunk
+    private val CHUNK_SIZE = 1024 * 1024 // 1MB per chunk
 
     /**
      * Called by JS when the WebView bridge is initialized and ready.
      */
     @JavascriptInterface
-    fun onBridgeReady() {
+    fun onBridgeReady(data: String) {
         _isJsReady.value = true
     }
 

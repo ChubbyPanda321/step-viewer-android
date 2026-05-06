@@ -21,3 +21,8 @@
 
 # Keep occt-import-js (if bundled in native)
 -keep class com.stepviewer.** { *; }
+
+# Keep WebViewAssetLoader
+-keep class androidx.webkit.WebViewAssetLoader { *; }
+-keep class androidx.webkit.WebViewAssetLoader$* { *; }
+-dontwarn androidx.webkit.**

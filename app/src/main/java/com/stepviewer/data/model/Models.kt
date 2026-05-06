@@ -1,13 +1,14 @@
 package com.stepviewer.data.model
 
+import com.stepviewer.R
 import java.io.Serializable
 
 /**
  * Supported CAD file formats.
  */
-enum class CadFormat(val displayName: String, val extensions: List<String>) {
-    STEP("STEP", listOf("stp", "step", "p21")),
-    IGES("IGES", listOf("igs", "iges"));
+enum class CadFormat(val displayNameRes: Int, val extensions: List<String>) {
+    STEP(R.string.format_step, listOf("stp", "step", "p21")),
+    IGES(R.string.format_iges, listOf("igs", "iges"));
 
     companion object {
         fun fromExtension(ext: String): CadFormat? {
@@ -57,10 +58,12 @@ data class Measurement(
 /**
  * View mode for 3D rendering.
  */
-enum class ViewMode(val label: String) {
-    SOLID("Solid"),
-    WIREFRAME("Wireframe"),
-    TRANSPARENT("Transparent"),
+enum class ViewMode(val labelRes: Int) {
+    SOLID(R.string.view_solid),
+    SOLID_EDGES(R.string.view_solid_edges),
+    WIREFRAME(R.string.view_wireframe),
+    TRANSPARENT(R.string.view_transparent),
+    HIDDEN_LINE(R.string.view_hidden_line),
 }
 
 /**
@@ -94,4 +97,7 @@ data class ViewerUiState(
     val editingMaterial: Material? = null,
     val showFileHistory: Boolean = false,
     val snackbarMessage: String? = null,
+    val snapToVertex: Boolean = true,
+    val showInfoPanel: Boolean = false,
+    val showDimensions: Boolean = false,
 )
