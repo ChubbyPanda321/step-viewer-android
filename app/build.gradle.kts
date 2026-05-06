@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -9,6 +11,13 @@ android {
     namespace = "com.stepviewer"
     compileSdk = 34
 
+    // Load signing config from keystore.properties (not in git)
+    val keystoreProps = Properties()
+    val keystoreFile = rootProject.file("app/keystore.properties")
+    if (keystoreFile.exists()) {
+        keystoreProps.load(keystoreFile.inputStream())
+    }
+
     defaultConfig {
         applicationId = "com.stepviewer"
         minSdk = 26
@@ -19,6 +28,17 @@ android {
         vectorDrawables { useSupportLibrary = true }
     }
 
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -26,6 +46,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (keystoreFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false

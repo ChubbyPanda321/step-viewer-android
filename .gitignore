@@ -39,3 +39,7 @@ gen/
 out/
 .navigation/
 CLAUDE.md
+
+# Signing (private keys, never commit)
+app/release.keystore
+app/keystore.properties
