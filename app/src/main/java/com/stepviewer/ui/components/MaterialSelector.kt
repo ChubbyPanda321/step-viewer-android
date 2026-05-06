@@ -39,9 +39,7 @@ fun MaterialSelector(
     val customs = materials.filter { it.isCustom }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { expanded = true },
+        modifier = modifier.fillMaxWidth(),
     ) {
         OutlinedTextField(
             value = selectedMaterial?.name ?: stringResource(R.string.select_material),
@@ -55,6 +53,12 @@ fun MaterialSelector(
                 }
             },
             singleLine = true,
+        )
+        // Transparent overlay to capture clicks on the entire field
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { expanded = true },
         )
     }
 
