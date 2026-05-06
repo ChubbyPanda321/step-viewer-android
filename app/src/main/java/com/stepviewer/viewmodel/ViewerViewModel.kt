@@ -367,6 +367,10 @@ class ViewerViewModel @Inject constructor(
      * (e.g. language switch) where the WebView is rebuilt but the model is still cached.
      */
     fun reloadLastModel() {
+        // Skip if a manual loadFile() is already in progress — avoids
+        // racing two load commands where one fails but the other succeeds.
+        if (_uiState.value.isLoading) return
+
         val fileName = lastLoadedFileName ?: return
         val format = lastLoadedFormat ?: return
 
