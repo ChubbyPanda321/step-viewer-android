@@ -42,6 +42,9 @@
         currentFormat: 'step',
     };
 
+    // Track hidden canvases used for dimension text sprite textures
+    var _labelTextureCanvases = [];
+
     // Compute bounding box from geometry vertices
     function computeBoundingBox(geometries) {
         const box = new THREE.Box3();
@@ -397,6 +400,13 @@
             };
 
             fitView();
+
+            // Refresh dimension labels if already showing (new model = new bbox)
+            if (state.showingDimensions) {
+                hideDimensionIndicators();
+                showDimensionIndicators();
+            }
+
             Bridge.onModelLoaded(modelInfo);
         } catch (e) {
             console.error('Error building scene:', e.message);
@@ -775,6 +785,43 @@
         });
     }
 
+    // Create a text sprite using canvas texture for dimension labels
+    function createDimensionSprite(text, colorHex, worldW) {
+        var canvas = document.createElement('canvas');
+        var canvasW = 512;
+        var canvasH = 96;
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        canvas.style.display = 'none';
+        document.body.appendChild(canvas);
+        _labelTextureCanvases.push(canvas);
+
+        var ctx = canvas.getContext('2d');
+        ctx.font = 'bold 36px Arial, Helvetica, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = colorHex;
+        ctx.fillText(text, canvasW / 2, canvasH / 2);
+
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+
+        var material = new THREE.SpriteMaterial({
+            map: texture,
+            depthTest: true,
+            depthWrite: false,
+            transparent: true,
+        });
+        var sprite = new THREE.Sprite(material);
+        var aspect = canvasW / canvasH;
+        var worldH = worldW / aspect;
+        sprite.scale.set(worldW, worldH, 1);
+
+        return { sprite: sprite, canvas: canvas };
+    }
+
     // Show/hide 3D dimension indicators at bounding box extents
     function setShowDimensions(visible) {
         if (visible) {
@@ -793,8 +840,16 @@
 
         var min = state.bbox.min;
         var max = state.bbox.max;
-        var colors = { X: 0xff4444, Y: 0x44ff44, Z: 0x4488ff };
-        var labels = { X: 'L', Y: 'W', Z: 'H' };
+        var colors = {
+            X: { int: 0xff4444, hex: '#ff4444' },
+            Y: { int: 0x44ff44, hex: '#44ff44' },
+            Z: { int: 0x4488ff, hex: '#4488ff' },
+        };
+
+        var bboxSize = new THREE.Vector3();
+        state.bbox.getSize(bboxSize);
+        var dimLabels = { X: 'L', Y: 'W', Z: 'H' };
+        var dimValues = { X: bboxSize.x, Y: bboxSize.y, Z: bboxSize.z };
 
         var axes = [
             { key: 'X', v1: new THREE.Vector3(min.x, min.y, min.z), v2: new THREE.Vector3(max.x, min.y, min.z) },
@@ -811,7 +866,7 @@
             [axis.v1, axis.v2].forEach(function (pt) {
                 var sphere = new THREE.Mesh(
                     new THREE.SphereGeometry(len * 0.012, 8, 8),
-                    new THREE.MeshBasicMaterial({ color: colors[axis.key] })
+                    new THREE.MeshBasicMaterial({ color: colors[axis.key].int })
                 );
                 sphere.position.copy(pt);
                 state.dimensionGroup.add(sphere);
@@ -832,20 +887,20 @@
             lineGeo.setFromPoints(points);
             var line = new THREE.Line(
                 lineGeo,
-                new THREE.LineDashedMaterial({ color: colors[axis.key], dashSize: len * 0.06, gapSize: len * 0.03 })
+                new THREE.LineDashedMaterial({ color: colors[axis.key].int, dashSize: len * 0.06, gapSize: len * 0.03 })
             );
             line.computeLineDistances();
             state.dimensionGroup.add(line);
 
-            // Label as small sphere at midpoint
-            var labelSphere = new THREE.Mesh(
-                new THREE.SphereGeometry(len * 0.018, 8, 8),
-                new THREE.MeshBasicMaterial({ color: colors[axis.key] })
-            );
-            labelSphere.position.copy(mid).add(
+            // Text sprite label at midpoint
+            var labelText = dimLabels[axis.key] + ': ' + dimValues[axis.key].toFixed(2) + ' mm';
+            var spriteWorldW = Math.max(len * 0.28, 2.0);
+            var result = createDimensionSprite(labelText, colors[axis.key].hex, spriteWorldW);
+            result.sprite.position.copy(mid).add(
                 new THREE.Vector3().copy(dir).multiplyScalar(len * 0.12)
             );
-            state.dimensionGroup.add(labelSphere);
+            result.sprite.userData._isDimensionLabel = true;
+            state.dimensionGroup.add(result.sprite);
         });
 
         state.scene.add(state.dimensionGroup);
@@ -855,11 +910,20 @@
         if (state.dimensionGroup) {
             state.dimensionGroup.traverse(function (obj) {
                 if (obj.geometry) obj.geometry.dispose();
-                if (obj.material) obj.material.dispose();
+                if (obj.material) {
+                    if (obj.material.map && obj.material.map.isCanvasTexture) {
+                        obj.material.map.dispose();
+                    }
+                    obj.material.dispose();
+                }
             });
             state.scene.remove(state.dimensionGroup);
             state.dimensionGroup = null;
         }
+        _labelTextureCanvases.forEach(function (c) {
+            if (c.parentNode) c.parentNode.removeChild(c);
+        });
+        _labelTextureCanvases = [];
     }
 
     // Capture screenshot as data URL
