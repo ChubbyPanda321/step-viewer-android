@@ -18,7 +18,7 @@
     <string name="mass">质量</string>
     <string name="material">材料</string>
     <string name="select_material">选择材料</string>
-    <string name="add_custom_material">+ 添加自定义材料…</string>
+    <string name="add_custom_material">添加自定义材料…</string>
     <string name="custom_material">自定义材料</string>
     <string name="material_name">材料名称</string>
     <string name="material_density">密度 (g/mm³)</string>

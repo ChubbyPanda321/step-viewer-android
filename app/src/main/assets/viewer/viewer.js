@@ -188,7 +188,7 @@
                 edgeGeo,
                 new THREE.LineBasicMaterial({ color: 0x000000 })
             );
-            edgeLine.visible = false;
+            edgeLine.visible = true;
 
             // Hidden-line: white solid with black edges on white background
             const matHiddenLine = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
@@ -208,7 +208,7 @@
                 hiddenLineMaterial: matHiddenLine,
                 edgeLine: edgeLine,
                 hiddenLineEdges: hiddenLineEdges,
-                currentMode: 'solid',
+                currentMode: 'solid_edges',
             };
 
             meshes.push(mesh);

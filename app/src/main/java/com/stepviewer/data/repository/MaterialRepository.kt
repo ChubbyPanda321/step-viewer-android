@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken
 import com.stepviewer.data.local.CustomMaterialDao
 import com.stepviewer.data.local.CustomMaterialEntity
 import com.stepviewer.data.model.Material
+import com.stepviewer.util.LocaleHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,15 +24,18 @@ class MaterialRepository @Inject constructor(
     private val customMaterialDao: CustomMaterialDao,
 ) {
     companion object {
-        private const val PRESETS_FILE = "materials.json"
+        private const val PRESETS_FILE_DEFAULT = "materials.json"
+        private const val PRESETS_FILE_EN = "materials-en.json"
     }
 
     /**
-     * Load preset materials from assets/materials.json.
+     * Load preset materials from locale-specific JSON in assets.
      */
     private suspend fun loadPresets(): List<Material> = withContext(Dispatchers.IO) {
         try {
-            val json = context.assets.open(PRESETS_FILE).bufferedReader().use { it.readText() }
+            val lang = LocaleHelper.getLanguageCode(context)
+            val fileName = if (lang == "en") PRESETS_FILE_EN else PRESETS_FILE_DEFAULT
+            val json = context.assets.open(fileName).bufferedReader().use { it.readText() }
             val type = object : TypeToken<Map<String, Double>>() {}.type
             val map: Map<String, Double> = Gson().fromJson(json, type)
             map.entries.mapIndexed { index, (name, density) ->
@@ -43,7 +47,6 @@ class MaterialRepository @Inject constructor(
                 )
             }
         } catch (e: IOException) {
-            // Fallback material list
             listOf(
                 Material(id = -1, name = "Steel", density = 0.00785, isCustom = false),
             )

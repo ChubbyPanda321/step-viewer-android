@@ -90,7 +90,7 @@ data class ViewerUiState(
     val activeMeasurements: List<Measurement> = emptyList(),
     val measurementVertexCount: Int = 0,
     val pendingMeasurementPoint: Triple<Double, Double, Double>? = null,
-    val viewMode: ViewMode = ViewMode.SOLID,
+    val viewMode: ViewMode = ViewMode.SOLID_EDGES,
     val themeMode: ThemeMode = ThemeMode.LIGHT,
     val isFavorite: Boolean = false,
     val showMaterialEditor: Boolean = false,

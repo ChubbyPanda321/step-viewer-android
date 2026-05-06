@@ -18,7 +18,7 @@
     <string name="mass">Mass</string>
     <string name="material">Material</string>
     <string name="select_material">Select material</string>
-    <string name="add_custom_material">+ Add custom material…</string>
+    <string name="add_custom_material">Add custom material…</string>
     <string name="custom_material">Custom material</string>
     <string name="material_name">Material Name</string>
     <string name="material_density">Density (g/mm³)</string>

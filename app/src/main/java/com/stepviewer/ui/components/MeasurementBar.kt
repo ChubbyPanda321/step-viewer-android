@@ -82,7 +82,7 @@ fun MeasurementBar(
         Column(
             modifier = Modifier.padding(12.dp),
         ) {
-            // Header row with collapse toggle
+            // Header row with title, snap toggle, and collapse button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,6 +107,17 @@ fun MeasurementBar(
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.primary,
                         )
+                        Spacer(Modifier.width(8.dp))
+                        FilterChip(
+                            selected = snapToVertex,
+                            onClick = onToggleSnapToVertex,
+                            label = {
+                                Text(
+                                    stringResource(R.string.snap_to_vertex),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            },
+                        )
                     }
                 }
                 if (measurements.isNotEmpty()) {
@@ -121,26 +132,6 @@ fun MeasurementBar(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                }
-            }
-
-            // Snap-to-vertex toggle — only visible while measuring
-            if (isMeasuring) {
-                Spacer(Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                ) {
-                    FilterChip(
-                        selected = snapToVertex,
-                        onClick = onToggleSnapToVertex,
-                        label = {
-                            Text(
-                                stringResource(R.string.snap_to_vertex),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        },
-                    )
                 }
             }
 
