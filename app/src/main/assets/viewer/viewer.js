@@ -675,9 +675,10 @@
                 line.userData = { measurementId: mId };
                 state.measurementGroup.add(line);
 
-                // Re-color first node to match
+                // Tag endpoint spheres with measurementId for cleanup
                 window._previewNodes.forEach(function (n, i) {
                     n.material.color.set(0x1565C0);
+                    n.userData.measurementId = mId;
                 });
 
                 Bridge.onMeasurementResult({
