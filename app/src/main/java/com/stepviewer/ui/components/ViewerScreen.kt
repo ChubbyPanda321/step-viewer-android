@@ -184,7 +184,7 @@ fun ViewerScreen(
                 measurements = uiState.activeMeasurements,
                 isMeasuring = uiState.isMeasuring,
                 onRemove = { viewModel.removeMeasurement(it) },
-                modifier = Modifier.align(Alignment.TopEnd),
+                modifier = Modifier.align(Alignment.TopStart),
             )
 
             // Persistent info panel at bottom
