@@ -1,7 +1,6 @@
 package com.stepviewer.ui.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stepviewer.R
@@ -38,29 +38,23 @@ fun MaterialSelector(
     val presets = materials.filter { !it.isCustom }
     val customs = materials.filter { it.isCustom }
 
-    Box(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        OutlinedTextField(
-            value = selectedMaterial?.name ?: stringResource(R.string.select_material),
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.material)) },
-            trailingIcon = {
-                androidx.compose.material3.IconButton(onClick = { expanded = true }) {
-                    Text("▲", style = MaterialTheme.typography.bodySmall)
-                }
+    OutlinedTextField(
+        value = selectedMaterial?.name ?: stringResource(R.string.select_material),
+        onValueChange = {},
+        readOnly = true,
+        modifier = modifier
+            .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectTapGestures { expanded = true }
             },
-            singleLine = true,
-        )
-        // Transparent overlay to capture clicks on the entire field
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable { expanded = true },
-        )
-    }
+        label = { Text(stringResource(R.string.material)) },
+        trailingIcon = {
+            androidx.compose.material3.IconButton(onClick = { expanded = true }) {
+                Text("▲", style = MaterialTheme.typography.bodySmall)
+            }
+        },
+        singleLine = true,
+    )
 
     DropdownMenu(
         expanded = expanded,
