@@ -11,13 +11,6 @@ android {
     namespace = "com.stepviewer"
     compileSdk = 34
 
-    // Load signing config from keystore.properties (not in git)
-    val keystoreProps = Properties()
-    val keystoreFile = rootProject.file("app/keystore.properties")
-    if (keystoreFile.exists()) {
-        keystoreProps.load(keystoreFile.inputStream())
-    }
-
     defaultConfig {
         applicationId = "com.stepviewer"
         minSdk = 26
@@ -28,14 +21,17 @@ android {
         vectorDrawables { useSupportLibrary = true }
     }
 
+    val keystorePropsFile = file("keystore.properties")
+    val keystoreProps = if (keystorePropsFile.exists()) {
+        Properties().apply { keystorePropsFile.inputStream().use { load(it) } }
+    } else null
+
     signingConfigs {
-        if (keystoreFile.exists()) {
-            create("release") {
-                storeFile = file(keystoreProps.getProperty("storeFile"))
-                storePassword = keystoreProps.getProperty("storePassword")
-                keyAlias = keystoreProps.getProperty("keyAlias")
-                keyPassword = keystoreProps.getProperty("keyPassword")
-            }
+        create("myRelease") {
+            storeFile = keystoreProps?.getProperty("storeFile")?.let { file(it) } ?: file("release.keystore")
+            storePassword = keystoreProps?.getProperty("storePassword") ?: "android123"
+            keyAlias = keystoreProps?.getProperty("keyAlias") ?: "stepviewer"
+            keyPassword = keystoreProps?.getProperty("keyPassword") ?: "android123"
         }
     }
 
@@ -46,9 +42,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (keystoreFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            signingConfig = signingConfigs.getByName("myRelease")
         }
         debug {
             isMinifyEnabled = false
