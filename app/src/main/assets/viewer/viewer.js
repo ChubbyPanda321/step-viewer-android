@@ -182,7 +182,7 @@
             });
 
             // Edge line for solid+edges mode — low threshold catches subtle edges
-            const edgeGeo = new THREE.EdgesGeometry(geometry, 2);
+            const edgeGeo = new THREE.EdgesGeometry(geometry, 12);
             const edgeLine = new THREE.LineSegments(
                 edgeGeo,
                 new THREE.LineBasicMaterial({ color: 0x000000 })
@@ -192,7 +192,7 @@
             // Hidden-line: white solid with black edges on white background
             const matHiddenLine = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
             const hiddenLineEdges = new THREE.LineSegments(
-                new THREE.EdgesGeometry(geometry, 2),
+                new THREE.EdgesGeometry(geometry, 12),
                 new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 })
             );
             hiddenLineEdges.visible = false;
