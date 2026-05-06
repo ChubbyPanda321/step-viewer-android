@@ -789,7 +789,7 @@
     function createDimensionSprite(text, colorHex, worldW) {
         var canvas = document.createElement('canvas');
         var canvasW = 512;
-        var canvasH = 96;
+        var canvasH = 128;
         canvas.width = canvasW;
         canvas.height = canvasH;
         canvas.style.display = 'none';
@@ -797,7 +797,7 @@
         _labelTextureCanvases.push(canvas);
 
         var ctx = canvas.getContext('2d');
-        ctx.font = 'bold 36px Arial, Helvetica, sans-serif';
+        ctx.font = 'bold 52px Arial, Helvetica, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = colorHex;
