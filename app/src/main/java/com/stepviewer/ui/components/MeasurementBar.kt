@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,7 +49,9 @@ import kotlin.math.roundToInt
 fun MeasurementBar(
     measurements: List<Measurement>,
     isMeasuring: Boolean,
+    snapToVertex: Boolean,
     onRemove: (String) -> Unit,
+    onToggleSnapToVertex: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (measurements.isEmpty() && !isMeasuring) return
@@ -118,6 +121,26 @@ fun MeasurementBar(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                }
+            }
+
+            // Snap-to-vertex toggle — only visible while measuring
+            if (isMeasuring) {
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    FilterChip(
+                        selected = snapToVertex,
+                        onClick = onToggleSnapToVertex,
+                        label = {
+                            Text(
+                                stringResource(R.string.snap_to_vertex),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        },
+                    )
                 }
             }
 

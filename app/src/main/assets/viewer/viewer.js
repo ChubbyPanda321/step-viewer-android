@@ -38,6 +38,7 @@
         raycaster: null,
         mouse: null,
         isMeasuring: false,
+        snapToVertex: false,
         currentFormat: 'step',
     };
 
@@ -623,7 +624,7 @@
             var point = intersects[0].point.clone();
 
             // Snap to nearest vertex if enabled
-            if (state.snapToVertex !== false && intersects[0].face) {
+            if (state.snapToVertex && intersects[0].face) {
                 var face = intersects[0].face;
                 var geo = intersects[0].object.geometry;
                 var pos = geo.getAttribute('position');

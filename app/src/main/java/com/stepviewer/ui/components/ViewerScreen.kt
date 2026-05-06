@@ -183,7 +183,9 @@ fun ViewerScreen(
             MeasurementBar(
                 measurements = uiState.activeMeasurements,
                 isMeasuring = uiState.isMeasuring,
+                snapToVertex = uiState.snapToVertex,
                 onRemove = { viewModel.removeMeasurement(it) },
+                onToggleSnapToVertex = { viewModel.toggleSnapToVertex() },
                 modifier = Modifier.align(Alignment.TopStart),
             )
 
@@ -197,7 +199,6 @@ fun ViewerScreen(
                     materials = uiState.materials,
                     isMeasuring = uiState.isMeasuring,
                     showDimensions = uiState.showDimensions,
-                    snapToVertex = uiState.snapToVertex,
                     viewMode = uiState.viewMode,
                     isFavorite = uiState.isFavorite,
                     isModelLoaded = uiState.isModelLoaded,
@@ -211,7 +212,6 @@ fun ViewerScreen(
                     onAddCustomMaterial = { viewModel.toggleMaterialEditor() },
                     onToggleMeasurement = { viewModel.toggleMeasurement() },
                     onToggleShowDimensions = { viewModel.toggleShowDimensions() },
-                    onToggleSnapToVertex = { viewModel.toggleSnapToVertex() },
                     onViewModeChange = { viewModel.setViewMode(it) },
                     onFavoriteToggle = { viewModel.toggleFavorite() },
                     onFitView = { viewModel.fitView() },
